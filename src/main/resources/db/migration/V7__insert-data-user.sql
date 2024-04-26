@@ -1,0 +1,2 @@
+--INSERT INTO users (name, last_name, email, phone, rut, password, role)
+--VALUES ('Juan', 'Pérez', 'juan@example.com', '12345678', '20.012.902-4', 'password123', 'USER');
