@@ -93,6 +93,7 @@ public class HttpSecurityConfig {
 
         // END POINTS PUBLICOS
         auth.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
+        auth.requestMatchers(HttpMethod.POST, "/auth/logout").permitAll();
         auth.requestMatchers(HttpMethod.POST, "/users/register/user").permitAll();
         auth.requestMatchers(HttpMethod.POST, "/users/register/admin").permitAll();
         auth.anyRequest().authenticated();

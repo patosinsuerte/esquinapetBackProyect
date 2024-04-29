@@ -3,6 +3,7 @@ package com.esquinaPet.veterinariabackend.controllers;
 import com.esquinaPet.veterinariabackend.domain.services.auth.AuthenticationService;
 import com.esquinaPet.veterinariabackend.domain.services.impl.AppointmentServiceImpl;
 import com.esquinaPet.veterinariabackend.dto.*;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -53,6 +54,19 @@ public class AuthenticationController {
     }
 
 
+    // LOGOUT METHOD
+
+    @PostMapping("/logout")
+    public ResponseEntity<LogoutResponse> logout(
+            HttpServletRequest httpServletRequest
+    ){
+        authenticationService.logout(httpServletRequest);
+        return ResponseEntity.ok(new LogoutResponse("Logout exitoso"));
+    }
+
+
+
+
 
 /*********************LOGGED USER****************************************************/
 
@@ -85,5 +99,6 @@ public class AuthenticationController {
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(appointmentService.cancelAppointmentByAuthenticatedUser(id));
     }
+
 
 }

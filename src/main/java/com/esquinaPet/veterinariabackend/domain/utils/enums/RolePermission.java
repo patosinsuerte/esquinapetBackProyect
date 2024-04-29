@@ -11,6 +11,7 @@ public enum RolePermission {
     UPDATE_OWN_APPOINTMENT,
     DISABLED_ONE_APPOINTMENT,
     DISABLED_OWN_APPOINTMENT,
+    LOGOUT,
 
 
     // services type

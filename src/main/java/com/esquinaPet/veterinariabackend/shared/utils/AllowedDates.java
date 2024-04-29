@@ -30,7 +30,6 @@ public class AllowedDates {
                 this.allowedDatesList.add(LocalDate.of(yearNow, i, j));
             }
         }
-        System.out.println(this.allowedDatesList);
     }
 
     public boolean validateDateWithAllowedDates(LocalDate date){

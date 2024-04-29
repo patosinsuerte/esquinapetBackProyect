@@ -2,9 +2,12 @@ package com.esquinaPet.veterinariabackend.domain.services.auth;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.Map;
@@ -57,16 +60,21 @@ public class JwtService {
 
     }
 
-//    private Claims extraClaims(String jwt) {
-//        try {
-//            // Utiliza el método parseClaimsJws para parsear JWTs firmados (JWS)
-//            return Jwts.parser().
-//                verifyWith(generateKey()).build()
-//                .parseSignedClaims(jwt).getPayload();
-//        } catch (JwtException e) {
-//            // Maneja la excepción JwtException (que incluye MalformedJwtException)
-//            System.err.println("Error al analizar el token JWT: " + e.getMessage());
-//            throw e; // Re-lanza la excepción para que sea manejada en un nivel superior si es necesario
-//        }
-//    }
+    public String extractJwtFromRequest(HttpServletRequest request) {
+        // primer paso
+        String authorizationHeader = request.getHeader("Authorization");
+        // validar si viene el token, sino viene ejecutamos el filtro
+        // y decimos que siga con su camino pasando el rquest y el response como argumento
+        // retornando elc ontrol al hilo de ejecucion
+        if (!StringUtils.hasText(authorizationHeader) || !authorizationHeader.startsWith("Bearer ")) {
+            return null;
+        }
+
+        // obtener el jwt desde el authorization
+        return authorizationHeader.split(" ")[1];
+    }
+
+    public Date extractExpiration(String jwt) {
+        return extraClaims(jwt).getExpiration();
+    }
 }

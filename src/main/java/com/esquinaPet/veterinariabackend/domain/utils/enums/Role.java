@@ -12,6 +12,7 @@ public enum Role {
             RolePermission.CREATE_ONE_APPOINTMENT,
             RolePermission.UPDATE_ONE_APPOINTMENT,
             RolePermission.DISABLED_ONE_APPOINTMENT,
+            RolePermission.LOGOUT,
 
             RolePermission.READ_ALL_SERVICE_TYPES,
             RolePermission.READ_ONE_SERVICE_TYPE,
@@ -26,7 +27,7 @@ public enum Role {
             RolePermission.CREATE_ONE_APPOINTMENT,
             RolePermission.UPDATE_ONE_APPOINTMENT,
             RolePermission.DISABLED_ONE_APPOINTMENT,
-
+            RolePermission.LOGOUT,
             RolePermission.READ_ALL_SERVICE_TYPES,
             RolePermission.READ_ONE_SERVICE_TYPE,
             RolePermission.CREATE_ONE_SERVICE_TYPES,
@@ -40,7 +41,8 @@ public enum Role {
             RolePermission.CREATE_ONE_APPOINTMENT,
             RolePermission.UPDATE_ONE_APPOINTMENT,
             RolePermission.DISABLED_ONE_APPOINTMENT,
-            RolePermission.READ_MY_PROFILE
+            RolePermission.READ_MY_PROFILE,
+            RolePermission.LOGOUT
     ));
 
 
