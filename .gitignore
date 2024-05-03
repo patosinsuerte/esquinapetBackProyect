@@ -34,4 +34,4 @@ build/
 
 
 #application properties
-
+secrets.properties

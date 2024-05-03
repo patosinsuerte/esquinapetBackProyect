@@ -22,11 +22,12 @@ public class AllowedDates {
         // mes actual
         int monthNow = dateNow.getMonthValue();
 
-
+        // Reiniciar la lista de fechas permitidas
+        this.allowedDatesList.clear();
         for (int i = monthNow; i <= 12; i++) {
-            int firstDayOfMonth = (i == monthNow) ? dateNow.getDayOfMonth() : 1;
-            int lastDayOfMonth = LocalDate.of(yearNow, monthNow, 1).lengthOfMonth();
-            for (var j = firstDayOfMonth; j <= lastDayOfMonth; j++) {
+            // Obtener el último día del mes
+            int lastDayOfMonth = LocalDate.of(yearNow, i, 1).lengthOfMonth();
+            for (int j = 1; j <= lastDayOfMonth; j++) {
                 this.allowedDatesList.add(LocalDate.of(yearNow, i, j));
             }
         }
