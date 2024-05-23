@@ -21,5 +21,5 @@ public class UserResponseDTO implements Serializable {
     private String rut;
     private String role;
     //    @JsonManagedReference
-    private List<Appointment> appointments;
+    private List<AppointmentResponseDTO> appointments;
 }

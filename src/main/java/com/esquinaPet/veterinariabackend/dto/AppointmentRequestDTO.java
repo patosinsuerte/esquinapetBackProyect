@@ -45,7 +45,7 @@ public class AppointmentRequestDTO implements Serializable {
     @NotNull
     private LocalTime time;
     @NotNull
-    private Long ServiceTypeId;
+    private Long serviceTypeId;
     @NotNull
     private Long petId;
 }

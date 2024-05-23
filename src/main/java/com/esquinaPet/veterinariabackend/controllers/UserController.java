@@ -4,6 +4,7 @@ package com.esquinaPet.veterinariabackend.controllers;
 import com.esquinaPet.veterinariabackend.domain.services.auth.AuthenticationService;
 import com.esquinaPet.veterinariabackend.dto.RegisteredUserDTO;
 import com.esquinaPet.veterinariabackend.dto.SaveUserDTO;
+import com.esquinaPet.veterinariabackend.infra.exceptions.UserAlreadyExistsException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,11 +33,15 @@ public class UserController {
             @RequestBody SaveUserDTO saveUserDTO,
             UriComponentsBuilder uriComponentsBuilder
     ) {
+
+
         RegisteredUserDTO registeredUserDTO = authenticationService.registerOneUser(saveUserDTO);
         System.out.println(registeredUserDTO);
         URI url = uriComponentsBuilder.path("/{id}").buildAndExpand(registeredUserDTO.getId()).toUri();
         return ResponseEntity.created(url).body(registeredUserDTO);
+
     }
+
 
     // REGISTRAR UN ADMIN
     @PostMapping("/register/admin")
@@ -49,6 +54,10 @@ public class UserController {
         URI url = uriComponentsBuilder.path("/{id}").buildAndExpand(registeredUserDTO.getId()).toUri();
         return ResponseEntity.created(url).body(registeredUserDTO);
     }
+
+
+
+    // CHECKEAR SI EL USUARIO EXISTE
 
 
 }

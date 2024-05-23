@@ -19,5 +19,5 @@ public class UserProfileDTO implements Serializable {
     private String phone;
     private String rut;
     private String role;
-    private List<Appointment> appointments;
+    private List<AppointmentResponseDTO> appointments;
 }

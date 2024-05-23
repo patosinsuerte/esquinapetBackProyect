@@ -4,6 +4,7 @@ package com.esquinaPet.veterinariabackend.infra.errors;
 import com.esquinaPet.veterinariabackend.dto.ApiError;
 import com.esquinaPet.veterinariabackend.infra.exceptions.InvalidAppointmentDateException;
 import com.esquinaPet.veterinariabackend.infra.exceptions.InvalidAppointmentTimeException;
+import com.esquinaPet.veterinariabackend.infra.exceptions.UserAlreadyExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.Ordered;
@@ -145,20 +146,36 @@ public class ErrorHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiError);
     }
 
-    // ACCESS DENIED ESCEPTION
-//    @ExceptionHandler(AccessDeniedException.class)
-//    public ResponseEntity<?> handlerAccessDeniedException(
-//            HttpServletRequest request,
-//            AccessDeniedException e
-//    ) {
-//        ApiError apiError = new ApiError();
-//        apiError.setBackendMessage(e.getLocalizedMessage());
-//        apiError.setUrl(request.getRequestURL().toString());
-//        apiError.setMethod(request.getMethod());
-//        apiError.setMessage("Acceso denegado: No tienes los permisos suficientes. Por favor, contacta al administrador si crees que es un error");
-//        apiError.setTimestamp(LocalDateTime.now());
-//        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiError);
-//    }
+
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handlePhoneAlreadyExistsException(UserAlreadyExistsException exception) {
+        String errorMessage = exception.getMessage();
+        String fieldName = exception.getFieldName(); // Obtener el nombre del campo afectado
+
+        // Determinar la acción y el mensaje de error según el tipo de excepción
+        String description = ""; // Valor predeterminado
+        if (fieldName.equals("email")) {
+            description = "The email is already in use, please try another";
+        }
+        if (fieldName.equals("phone")) {
+            description = "The phone is already in use, please try another";
+        }
+        if (fieldName.equals("rut")) {
+            description = "The rut is already in use, please try another";
+        }
+
+        // Construir el cuerpo de la respuesta
+        Map<String, Object> responseBody = buildResponse(
+                fieldName,
+                errorMessage,
+                description,
+                HttpStatus.BAD_REQUEST.value()
+        );
+
+        // Devolver la respuesta
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+    }
 
 
 }

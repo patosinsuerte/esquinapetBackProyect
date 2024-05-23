@@ -3,6 +3,7 @@ package com.esquinaPet.veterinariabackend.domain.services.impl;
 
 import com.esquinaPet.veterinariabackend.domain.mappers.SaveUserMapper;
 import com.esquinaPet.veterinariabackend.domain.models.User;
+import com.esquinaPet.veterinariabackend.infra.exceptions.UserAlreadyExistsException;
 import com.esquinaPet.veterinariabackend.persistence.repositories.UserRepository;
 import com.esquinaPet.veterinariabackend.domain.services.UserService;
 import com.esquinaPet.veterinariabackend.domain.utils.enums.Role;
@@ -11,9 +12,12 @@ import com.esquinaPet.veterinariabackend.infra.exceptions.InvalidPasswordExcepti
 import com.esquinaPet.veterinariabackend.infra.exceptions.ObjectNotFoundException;
 import com.esquinaPet.veterinariabackend.shared.utils.AddCountryCode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -45,19 +49,49 @@ public class UserServiceImpl implements UserService {
     * */
     @Override
     public User registerOneUser(SaveUserDTO saveUserDTO) {
-        // Validar contrasena
+        boolean emailHasExist = this.emailHasExist(saveUserDTO.getEmail());
+        boolean phoneHasExist = this.phoneHasExist(saveUserDTO.getPhone());
+        boolean rutHasExist = this.rutHasExist(saveUserDTO.getRut());
+
+        if (emailHasExist) {
+            throw new UserAlreadyExistsException("Email: " + saveUserDTO.getEmail() + " already exist", "email");
+        }
+        if (phoneHasExist) {
+            throw new UserAlreadyExistsException("Phone: " + saveUserDTO.getPhone() + " already exist", "phone");
+        }
+        if (rutHasExist) {
+            throw new UserAlreadyExistsException("Rut: " + saveUserDTO.getRut() + " already exist", "rut");
+        }
+
+
         this.validatePassword(saveUserDTO);
         User newUser = saveUserMapper.saveUserDTOToUser(saveUserDTO);
         newUser.setRole(Role.USER);
         newUser.setPhone(addCountryCode.addCountryCode(saveUserDTO.getPhone()));
         newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
-        System.out.println("SE IMPRIME EL NUMERO: " + newUser.getPhone());
         return userRepository.save(newUser);
+
+
+        // Validar contrasena
+
     }
 
     // CREATE / REGISTER ONE ADMIN
     @Override
     public User registerOneAdmin(SaveUserDTO saveUserDTO) {
+        boolean emailHasExist = this.emailHasExist(saveUserDTO.getEmail());
+        boolean phoneHasExist = this.phoneHasExist(saveUserDTO.getPhone());
+        boolean rutHasExist = this.rutHasExist(saveUserDTO.getRut());
+        if (emailHasExist) {
+            throw new UserAlreadyExistsException("Email: " + saveUserDTO.getEmail() + " already exist", "email");
+        }
+        if (phoneHasExist) {
+            throw new UserAlreadyExistsException("Phone: " + saveUserDTO.getPhone() + " already exist", "phone");
+        }
+        if (rutHasExist) {
+            throw new UserAlreadyExistsException("Rut: " + saveUserDTO.getRut() + " already exist", "rut");
+        }
+
         // Validar contrasena
         this.validatePassword(saveUserDTO);
         User newAdmin = saveUserMapper.saveUserDTOToUser(saveUserDTO);
@@ -84,20 +118,34 @@ public class UserServiceImpl implements UserService {
         );
     }
 
+    @Override
+    public boolean emailHasExist(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    @Override
+    public boolean phoneHasExist(String phone) {
+        return userRepository.findByPhone("+56"+phone).isPresent();
+    }
+
+    @Override
+    public boolean rutHasExist(String rut) {
+        return userRepository.findByRut(rut).isPresent();
+    }
+
 
     // METODOS PRIVADOS DE UTILIDAD
     // metodo para validar contrasena
-    private void validatePassword(SaveUserDTO saveUserDTO){
-        if(!StringUtils.hasText(saveUserDTO.getPassword()) ||
-                !StringUtils.hasText(saveUserDTO.getRepeatedPassword())){
+    private void validatePassword(SaveUserDTO saveUserDTO) {
+        if (!StringUtils.hasText(saveUserDTO.getPassword()) ||
+                !StringUtils.hasText(saveUserDTO.getRepeatedPassword())) {
             throw new InvalidPasswordException("Passwords don't match");
         }
-        if(!saveUserDTO.getPassword()
-                .equals(saveUserDTO.getRepeatedPassword())){
+        if (!saveUserDTO.getPassword()
+                .equals(saveUserDTO.getRepeatedPassword())) {
             throw new InvalidPasswordException("Passwords don't match");
         }
     }
-
 
 
 }

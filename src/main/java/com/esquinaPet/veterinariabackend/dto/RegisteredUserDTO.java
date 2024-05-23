@@ -22,5 +22,5 @@ public class RegisteredUserDTO implements Serializable {
     private String role;
     private String jwt;
 //    @JsonManagedReference
-    private List<Appointment> appointments;
+    private List<AppointmentResponseDTO> appointments;
 }

@@ -15,5 +15,10 @@ public interface UserService {
 
     User findUserById(Long id);
 
+    boolean emailHasExist(String email);
+
+    boolean phoneHasExist(String phone);
+
+    boolean rutHasExist(String rut);
 
 }

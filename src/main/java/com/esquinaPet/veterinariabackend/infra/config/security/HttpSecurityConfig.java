@@ -105,6 +105,7 @@ public class HttpSecurityConfig {
         auth.requestMatchers(HttpMethod.POST, "/users/register/user").permitAll();
         auth.requestMatchers(HttpMethod.POST, "/users/register/admin").permitAll();
         auth.requestMatchers(HttpMethod.GET, "/test").permitAll();
+        auth.requestMatchers(HttpMethod.GET, "/validation/**").permitAll();
         auth.anyRequest().authenticated();
     }
 
@@ -113,7 +114,7 @@ public class HttpSecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:5500", "http://localhost:8083", "http://localhost:5500"));
+        configuration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:5500", "http://localhost:8083", "http://localhost:5500", "http://localhost:4200", "http://127.0.0.1:4200"));
         configuration.setAllowedMethods(Arrays.asList("GET","POST"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

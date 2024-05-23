@@ -27,6 +27,6 @@ public class AppointmentResponseDTO implements Serializable {
     private LocalDate date;
     @JsonFormat(pattern = "HH:mm")
     private LocalTime time;
-    private Pet pet;
-    private ServiceType serviceType;
+    private PetDTO pet;
+    private ServiceTypeDTO serviceType;
 }
