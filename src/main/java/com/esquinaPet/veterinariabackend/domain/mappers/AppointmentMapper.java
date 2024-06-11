@@ -25,6 +25,9 @@ public interface AppointmentMapper {
             @Mapping(source = "date", target = "date"),
             @Mapping(source = "time", target = "time"),
             @Mapping(source = "pet", target = "pet"),
+            @Mapping(source = "isAvailable", target = "isAvailable"),
+            @Mapping(source = "isActive", target = "isActive"),
+            @Mapping(source = "petName", target = "petName"),
             @Mapping(source = "serviceType", target = "serviceType")
 
     })

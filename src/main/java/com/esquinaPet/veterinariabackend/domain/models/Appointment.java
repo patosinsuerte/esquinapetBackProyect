@@ -34,6 +34,10 @@ public class Appointment {
     @Column(name = "last_name")
     @NotNull
     private String lastName;
+    @Column(name = "pet_name")
+    @Pattern(regexp = "^[A-Za-záéíóúüñÁÉÍÓÚÜÑ]+$")
+    @NotNull
+    private String petName;
     @Pattern(regexp = "^\\d{2}\\.\\d{3}\\.\\d{3}-[\\dk]$")
     @Column(unique = true)
     @Size(min = 12, max = 12)
@@ -58,6 +62,9 @@ public class Appointment {
     @Column(name = "created_at")
     @NotNull
     private Timestamp createdAt;
+    @NotNull
+    @Column(name = "is_active")
+    private Boolean isActive;
     @OneToOne
     @JoinColumn(name = "service_types_id")
     @NotNull
@@ -70,4 +77,5 @@ public class Appointment {
     @NotNull
     @JoinColumn(name = "pet_id")
     private Pet pet;
+
 }

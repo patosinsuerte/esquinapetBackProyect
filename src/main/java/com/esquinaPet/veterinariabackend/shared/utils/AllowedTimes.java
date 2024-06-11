@@ -19,6 +19,7 @@ public class AllowedTimes {
             LocalTime.of(12, 0),
             LocalTime.of(12, 30),
             LocalTime.of(13, 15),
+            LocalTime.of(15, 0),
             LocalTime.of(15, 45),
             LocalTime.of(16, 30),
             LocalTime.of(17, 15)

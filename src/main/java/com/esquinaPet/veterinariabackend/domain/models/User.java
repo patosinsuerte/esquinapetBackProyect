@@ -65,7 +65,9 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Appointment> appointments;
-
+    @NotNull
+    @Column(name = "is_active")
+    private Boolean isActive;
 
     // metodos de UserDetails
     @Override

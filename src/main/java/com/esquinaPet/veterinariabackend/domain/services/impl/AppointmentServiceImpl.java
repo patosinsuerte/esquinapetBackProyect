@@ -7,26 +7,30 @@ import com.esquinaPet.veterinariabackend.domain.models.Appointment;
 import com.esquinaPet.veterinariabackend.domain.models.Pet;
 import com.esquinaPet.veterinariabackend.domain.models.ServiceType;
 import com.esquinaPet.veterinariabackend.domain.models.User;
+import com.esquinaPet.veterinariabackend.infra.exceptions.*;
 import com.esquinaPet.veterinariabackend.persistence.repositories.AppointmentRepository;
 import com.esquinaPet.veterinariabackend.domain.services.AppointmentService;
 import com.esquinaPet.veterinariabackend.domain.utils.enums.AvailabilityStatus;
 import com.esquinaPet.veterinariabackend.dto.AppointmentRequestDTO;
 import com.esquinaPet.veterinariabackend.dto.AppointmentResponseDTO;
 import com.esquinaPet.veterinariabackend.dto.UserProfileDTO;
-import com.esquinaPet.veterinariabackend.infra.exceptions.InvalidAppointmentDateException;
-import com.esquinaPet.veterinariabackend.infra.exceptions.InvalidAppointmentTimeException;
-import com.esquinaPet.veterinariabackend.infra.exceptions.ObjectNotFoundException;
+import com.esquinaPet.veterinariabackend.shared.services.TimesService;
 import com.esquinaPet.veterinariabackend.shared.utils.AddCountryCode;
 import com.esquinaPet.veterinariabackend.shared.utils.AllowedDates;
 import com.esquinaPet.veterinariabackend.shared.utils.AllowedTimes;
+import com.esquinaPet.veterinariabackend.shared.utils.ValidateBeforeDates;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
@@ -41,8 +45,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AllowedTimes allowedTimes;
     private final AllowedDates allowedDates;
     private final AddCountryCode addCountryCode;
-
-
+    private final TimesService timesService;
+    private final ValidateBeforeDates validateBeforeDates;
     //CONSTRUCTOR
     @Autowired
     public AppointmentServiceImpl(
@@ -55,7 +59,9 @@ public class AppointmentServiceImpl implements AppointmentService {
             PetServiceImpl petService,
             AllowedTimes allowedTimes,
             AllowedDates allowedDates,
-            AddCountryCode addCountryCode
+            AddCountryCode addCountryCode,
+            TimesService timesService,
+            ValidateBeforeDates validateBeforeDates
     ) {
         this.appointmentRepository = appointmentRepository;
         this.appointmentMapper = appointmentMapper;
@@ -67,6 +73,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         this.allowedTimes = allowedTimes;
         this.allowedDates = allowedDates;
         this.addCountryCode = addCountryCode;
+        this.timesService = timesService;
+        this.validateBeforeDates = validateBeforeDates;
     }
 
 
@@ -122,7 +130,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
 
-    //* CREATE NEW APPOINTMENT
+    //* CREATE NEW APPOINTMENT USUARIO LOGGEADO
     @Override
     public AppointmentResponseDTO createNewAppointment(AppointmentRequestDTO appointmentRequestDTO) {
 
@@ -130,8 +138,17 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (!allowedTimes.validateTime(appointmentRequestDTO.getTime())) {
             throw new InvalidAppointmentTimeException("La hora seleccionada no es válida: " + appointmentRequestDTO.getTime());
         }
+
+        if (!this.validateBeforeDates.verifyIfDateIsBeforeToActual(appointmentRequestDTO.getDate())){
+            throw new InvalidAppointmentDateException("La fecha seleccionada no es valida: " + appointmentRequestDTO.getDate());
+        }
+
         if (!allowedDates.validateDateWithAllowedDates(appointmentRequestDTO.getDate())) {
             throw new InvalidAppointmentDateException("La fecha seleccionada no es valida: " + appointmentRequestDTO.getDate());
+        }
+
+        if (this.timeAvailabilityValidation(appointmentRequestDTO.getTime(), appointmentRequestDTO.getDate())){
+            throw new TimeIsNotAvailable("La hora no esta disponible", HttpStatus.CONFLICT.toString(), "time");
         }
 
         //* OBTENER INSTANCIAS FALTANTES
@@ -141,6 +158,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         // obtener usuario logeado
         UserProfileDTO userProfileDTO = authenticationService.findLoggedInUser();
         User userDB = userService.findUserById(userProfileDTO.getId());
+
+        // validar correo y
+        this.userInfoMatch(appointmentRequestDTO, userProfileDTO);
+
+
         // setear los valores falantes
         Instant instant = Instant.now();
         Timestamp timestamp = Timestamp.from(instant);
@@ -149,6 +171,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         newAppointment.setPet(petTypeDB);
         newAppointment.setCreatedAt(timestamp);
         newAppointment.setUser(userDB);
+        newAppointment.setIsActive(true);
         newAppointment.setPhone(addCountryCode.addCountryCode(newAppointment.getPhone()));
         //GUARDAR APPOINTMENT
         appointmentRepository.save(newAppointment);
@@ -159,17 +182,16 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     //* CANCEL APPOINTMENT
     @Override
-    public AppointmentResponseDTO cancelAppointmentById(Long id) {
+    public Boolean cancelAppointmentById(Long id) {
         Appointment appointmentDB = appointmentRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException("Appintment not found with id: " + id));
         appointmentDB.setIsAvailable(AvailabilityStatus.AVAILABLE);
         appointmentRepository.save(appointmentDB);
-        return appointmentMapper.AppointmentToAppointmentDTO(appointmentDB);
+        return true;
     }
 
 
-    /********************** USUARIO AUTENTICADO*////////////////////*
-
+    /********************** USUARIO AUTENTICADO APPOINTMENT LOGIC*////////////////////*
     //* OBTENER CITAS MEDICAS DEL USUARIO AUTENTICADO
     @Override
     public List<AppointmentResponseDTO> findUserLoggedOwnAppointments() {
@@ -177,22 +199,97 @@ public class AppointmentServiceImpl implements AppointmentService {
         UserProfileDTO userProfileDTO = authenticationService.findLoggedInUser();
         User userLogged = userService.findUserById(userProfileDTO.getId());
         List<Appointment> appointmentResponseDTOS = userLogged.getAppointments();
-        return appointmentMapper.toAppointmentDTOList(appointmentResponseDTOS);
+
+
+
+        // Filtrar las citas para obtener solo las que tienen el estado "RESERVED"
+        List<Appointment> reservedAppointments = appointmentResponseDTOS.stream()
+                .filter(appointment -> appointment.getIsAvailable() == AvailabilityStatus.RESERVED)
+                .collect(Collectors.toList());
+
+        // Mapear las citas filtradas a DTOs y devolverlas
+        return appointmentMapper.toAppointmentDTOList(reservedAppointments);
     }
 
 
     /*CANCELAR CITAS DEL USUARIO AUTENTICADO*/
     @Override
-    public AppointmentResponseDTO cancelAppointmentByAuthenticatedUser(Long id) {
+    public Boolean cancelAppointmentByAuthenticatedUser(Long id) {
         List<AppointmentResponseDTO> appointmentResponseDTOList = this.findUserLoggedOwnAppointments();
-        AppointmentResponseDTO appointmentToCancel = appointmentResponseDTOList.stream()
-                .filter(appointment -> appointment.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new ObjectNotFoundException("Appointment not found with id: " + id));
 
-        AppointmentResponseDTO canceledAppointment = cancelAppointmentById(appointmentToCancel.getId());
-        return canceledAppointment;
+        // Buscar la cita con el ID especificado en la lista de citas del usuario autenticado
+        Optional<AppointmentResponseDTO> appointmentOptional = appointmentResponseDTOList.stream()
+                .filter(appointment -> appointment.getId().equals(id))
+                .findFirst();
+
+        // Verificar si se encontró la cita
+        if (appointmentOptional.isPresent()) {
+            // Obtener la cita desde la base de datos
+            Appointment appointmentDB = appointmentRepository.findById(appointmentOptional.get().getId())
+                    .orElseThrow(() -> new ObjectNotFoundException("Cita no encontrada con el ID: " + id));
+
+            // Actualizar el estado de disponibilidad de la cita
+            appointmentDB.setIsAvailable(AvailabilityStatus.CANCELLED);
+            appointmentRepository.save(appointmentDB);
+
+            // Devolver un mensaje de éxito
+            return  true;
+        } else {
+            // Devolver un mensaje de error si la cita no fue encontrada
+            return false;
+        }
+    }
+
+    @Override
+    public List<AppointmentResponseDTO> getAllUserAppointmentsActives() {
+        List<AppointmentResponseDTO> appointmentResponseDTOList = this.findUserLoggedOwnAppointments();
+
+        List<AppointmentResponseDTO> activeAppointments = appointmentResponseDTOList.stream().filter(AppointmentResponseDTO::getIsActive).toList();
+
+        return activeAppointments;
+    }
+
+
+    //validaciones de datos del usuario para crear una hora
+    private boolean userInfoMatch(AppointmentRequestDTO appointmentRequestDTO, UserProfileDTO userProfileDTO) {
+        if (!appointmentRequestDTO.getName().matches(userProfileDTO.getName())) {
+            throw new UserInfoNotMatchException("Los campos no coinciden", "name", appointmentRequestDTO.getName(), userProfileDTO.getName());
+        }
+
+        if (!appointmentRequestDTO.getRut().matches(userProfileDTO.getRut())) {
+            throw new UserInfoNotMatchException("Los campos no coinciden", "rut", appointmentRequestDTO.getRut(), userProfileDTO.getRut());
+        }
+        if (!appointmentRequestDTO.getEmail().matches(userProfileDTO.getEmail())) {
+            throw new UserInfoNotMatchException("Los campos no coinciden", "rut", appointmentRequestDTO.getRut(), userProfileDTO.getRut());
+        }
+
+        if (!appointmentRequestDTO.getLastName().matches(userProfileDTO.getLastName())) {
+            throw new UserInfoNotMatchException("Los campos no coinciden", "lastName", appointmentRequestDTO.getLastName(), userProfileDTO.getLastName());
+        }
+
+        String extractPhone = userProfileDTO.getPhone().substring(3);
+
+        if (!appointmentRequestDTO.getPhone().matches(extractPhone)) {
+            throw new UserInfoNotMatchException("Los campos no coinciden", "phone", appointmentRequestDTO.getPhone(), userProfileDTO.getPhone().substring(3));
+        }
+        return true;
+
+    }
+
+
+
+    private boolean timeAvailabilityValidation(LocalTime time, LocalDate date) {
+        List<LocalTime> times = timesService.findReservedTimesByDate(date);
+        if(times.contains(time)){
+            return true;
+        }
+        return false;
     }
 
 
 }
+
+
+
+
+

@@ -48,4 +48,5 @@ public class SaveUserDTO implements Serializable {
     @Size(min = 6, max = 30)
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*[0-9]).+$")
     private String repeatedPassword;
+    private Boolean isActive;
 }

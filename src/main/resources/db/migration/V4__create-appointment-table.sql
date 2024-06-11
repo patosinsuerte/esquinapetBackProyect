@@ -2,9 +2,11 @@ CREATE TABLE appointments(
   id BIGSERIAL PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
   last_name VARCHAR(50) NOT NULL,
+  pet_name VARCHAR(50) NOT NULL,
   rut VARCHAR(12) NOT NULL,
   phone VARCHAR(12) NOT NULL,
   email VARCHAR(100) NOT NULL,
+  is_active BOOLEAN NOT NULL,
   is_available VARCHAR(30) NOT NULL,
   date DATE NOT NULL CHECK (date >= CURRENT_DATE), -- Fecha debe ser mayor o igual a la fecha actual
   time TIME NOT NULL CHECK (time >= '00:00:00' AND time <= '23:59:59'), -- Hora debe estar entre 00:00:00 y 23:59:59
@@ -12,6 +14,7 @@ CREATE TABLE appointments(
   service_types_id BIGINT,
   user_id BIGINT,
   pet_id BIGINT,
+
   FOREIGN KEY (service_types_id) REFERENCES service_types(id),
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (pet_id) REFERENCES pets(id),

@@ -1,5 +1,6 @@
 package com.esquinaPet.veterinariabackend.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,8 +10,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthenticationResponseDTO implements Serializable {
+public class ValidationPasswordDTO implements Serializable {
 
-    private UserResponseDTO user;
-    private String jwt;
+    private String passwod;
 }

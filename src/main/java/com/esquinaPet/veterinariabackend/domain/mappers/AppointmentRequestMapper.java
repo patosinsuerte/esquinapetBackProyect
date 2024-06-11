@@ -21,9 +21,11 @@ public interface AppointmentRequestMapper {
             @Mapping(source = "phone", target = "phone"),
             @Mapping(source = "date", target = "date"),
             @Mapping(source = "time", target = "time"),
+            @Mapping(source = "isActive", target = "isActive"),
+            @Mapping(source = "isAvailable", target = "isAvailable"),
+            @Mapping(source = "petName", target = "petName"),
             @Mapping(source = "serviceTypeId", target = "serviceType.id"),
             @Mapping(source = "petId", target = "pet.id")
-
     })
     Appointment appointmentRequestDTOToAppointment(AppointmentRequestDTO appointmentRequestDTO);
 

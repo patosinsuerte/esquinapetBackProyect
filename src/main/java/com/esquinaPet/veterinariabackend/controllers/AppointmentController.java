@@ -60,8 +60,8 @@ public class AppointmentController {
 
 
     //* CANCEL APPOINTMENT
-    @PutMapping("/{id}/canceled")
-    public ResponseEntity<AppointmentResponseDTO> cancelAppointmentById(
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<Boolean> cancelAppointmentById(
             @PathVariable Long id
     ) {
         return ResponseEntity.ok(appointmentServiceImpl.cancelAppointmentById(id));
@@ -76,7 +76,6 @@ public class AppointmentController {
         List<LocalTime> reservedTimes = timesService.findReservedTimesByDate(date);
         return ResponseEntity.ok(reservedTimes);
     }
-
 
 
 

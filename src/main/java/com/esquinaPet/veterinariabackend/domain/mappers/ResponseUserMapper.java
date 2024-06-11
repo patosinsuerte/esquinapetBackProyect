@@ -22,6 +22,7 @@ public interface ResponseUserMapper {
             @Mapping(source = "phone", target = "phone"),
             @Mapping(source = "rut", target = "rut"),
             @Mapping(source = "role", target = "role"),
+            @Mapping(source = "isActive", target = "isActive"),
             @Mapping(source = "appointments", target = "appointments"),
     })
     UserResponseDTO userToUserResponseDTO(User user);

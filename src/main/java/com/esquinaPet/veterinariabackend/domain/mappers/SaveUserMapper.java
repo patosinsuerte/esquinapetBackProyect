@@ -19,7 +19,8 @@ public interface SaveUserMapper {
             @Mapping(source = "email", target = "email"),
             @Mapping(source = "phone", target = "phone"),
             @Mapping(source = "rut", target = "rut"),
-            @Mapping(source = "password", target = "password")
+            @Mapping(source = "password", target = "password"),
+            @Mapping(source = "isActive", target = "isActive")
     })
     User saveUserDTOToUser(SaveUserDTO saveUserDTO);
 

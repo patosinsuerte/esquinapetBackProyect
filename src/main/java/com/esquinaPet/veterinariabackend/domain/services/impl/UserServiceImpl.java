@@ -1,8 +1,13 @@
 package com.esquinaPet.veterinariabackend.domain.services.impl;
 
 
+import com.esquinaPet.veterinariabackend.domain.mappers.ResponseUserMapper;
 import com.esquinaPet.veterinariabackend.domain.mappers.SaveUserMapper;
 import com.esquinaPet.veterinariabackend.domain.models.User;
+import com.esquinaPet.veterinariabackend.domain.services.auth.AuthenticationService;
+import com.esquinaPet.veterinariabackend.dto.EditUserRequestDTO;
+import com.esquinaPet.veterinariabackend.dto.UserProfileDTO;
+import com.esquinaPet.veterinariabackend.dto.UserResponseDTO;
 import com.esquinaPet.veterinariabackend.infra.exceptions.UserAlreadyExistsException;
 import com.esquinaPet.veterinariabackend.persistence.repositories.UserRepository;
 import com.esquinaPet.veterinariabackend.domain.services.UserService;
@@ -12,12 +17,10 @@ import com.esquinaPet.veterinariabackend.infra.exceptions.InvalidPasswordExcepti
 import com.esquinaPet.veterinariabackend.infra.exceptions.ObjectNotFoundException;
 import com.esquinaPet.veterinariabackend.shared.utils.AddCountryCode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -27,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private final SaveUserMapper saveUserMapper;
     private final PasswordEncoder passwordEncoder;
     private final AddCountryCode addCountryCode;
+
 
     @Autowired
     public UserServiceImpl(
@@ -69,6 +73,7 @@ public class UserServiceImpl implements UserService {
         newUser.setRole(Role.USER);
         newUser.setPhone(addCountryCode.addCountryCode(saveUserDTO.getPhone()));
         newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+        newUser.setIsActive(true);
         return userRepository.save(newUser);
 
 
@@ -98,6 +103,7 @@ public class UserServiceImpl implements UserService {
         newAdmin.setRole(Role.ADMINISTRATOR);
         newAdmin.setPassword(passwordEncoder.encode(newAdmin.getPassword()));
         newAdmin.setPhone(addCountryCode.addCountryCode(saveUserDTO.getPhone()));
+        newAdmin.setIsActive(true);
         return userRepository.save(newAdmin);
     }
 
@@ -118,6 +124,8 @@ public class UserServiceImpl implements UserService {
         );
     }
 
+
+
     @Override
     public boolean emailHasExist(String email) {
         return userRepository.findByEmail(email).isPresent();
@@ -133,6 +141,18 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByRut(rut).isPresent();
     }
 
+    @Override
+    public boolean passwordHasMatch(String email, String password) {
+
+        User userDB = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ObjectNotFoundException("Object not found with email " + email));
+
+        if(this.passwordEncoder.matches(password, userDB.getPassword())){
+            return true;
+        }else {
+            return false;
+        }
+    }
 
     // METODOS PRIVADOS DE UTILIDAD
     // metodo para validar contrasena
@@ -146,6 +166,10 @@ public class UserServiceImpl implements UserService {
             throw new InvalidPasswordException("Passwords don't match");
         }
     }
+
+
+
+
 
 
 }

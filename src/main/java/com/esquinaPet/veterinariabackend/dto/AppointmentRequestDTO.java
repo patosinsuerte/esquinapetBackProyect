@@ -1,6 +1,10 @@
 package com.esquinaPet.veterinariabackend.dto;
 
+import com.esquinaPet.veterinariabackend.domain.utils.enums.AvailabilityStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -25,6 +29,10 @@ public class AppointmentRequestDTO implements Serializable {
     @Pattern(regexp = "^[A-Za-záéíóúüñÁÉÍÓÚÜÑ]+$")
     @Size(min = 3, max = 50)
     private String lastName;
+    @Column(name = "pet_name")
+    @Pattern(regexp = "^[A-Za-záéíóúüñÁÉÍÓÚÜÑ]+$")
+    @NotNull
+    private String petName;
     @NotNull
     @Pattern(regexp = "^\\d{2}\\.\\d{3}\\.\\d{3}-[\\dk]$")
     @Size(min = 12, max = 12)
@@ -38,6 +46,9 @@ public class AppointmentRequestDTO implements Serializable {
     @Pattern(regexp = "^[0-9]{9}$")
     @Size(min = 9, max = 9)
     private String phone;
+    @Enumerated(EnumType.STRING)
+    private AvailabilityStatus isAvailable;
+    private Boolean isActive;
     @JsonFormat(pattern = "yyyy-MM-dd")
     @NotNull
     private LocalDate date;
@@ -48,4 +59,5 @@ public class AppointmentRequestDTO implements Serializable {
     private Long serviceTypeId;
     @NotNull
     private Long petId;
+
 }

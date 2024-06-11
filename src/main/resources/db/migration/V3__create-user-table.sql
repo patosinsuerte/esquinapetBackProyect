@@ -6,6 +6,7 @@ CREATE TABLE users (
     phone VARCHAR(12) UNIQUE NOT NULL,
     rut VARCHAR(12) UNIQUE NOT NULL,
     password VARCHAR(2000) NOT NULL,
+    is_active BOOLEAN NOT NULL,
     role VARCHAR(100),
 
     CONSTRAINT valid_name CHECK (name ~ '^[A-Za-záéíóúüñÁÉÍÓÚÜÑ]+$'),

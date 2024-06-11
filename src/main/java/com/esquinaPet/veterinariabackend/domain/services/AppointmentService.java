@@ -29,14 +29,17 @@ public interface AppointmentService {
 
 
     // Disabled one appointment
-    AppointmentResponseDTO cancelAppointmentById(Long id);
+    Boolean cancelAppointmentById(Long id);
 
     // OBTENER CITAS DEL USUARIO AUTENTICADO
     List<AppointmentResponseDTO> findUserLoggedOwnAppointments();
 
 
     // Disabled one appointment by authenticated user
-    AppointmentResponseDTO cancelAppointmentByAuthenticatedUser(Long id);
+    Boolean cancelAppointmentByAuthenticatedUser(Long id);
 
+    // OBTENER TODAS LAS CITAS ACTIVAS NO ELIMINADAS DEL USUARIO
+
+    List<AppointmentResponseDTO> getAllUserAppointmentsActives();
 
 }

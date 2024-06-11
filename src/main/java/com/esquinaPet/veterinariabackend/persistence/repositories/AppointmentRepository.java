@@ -19,4 +19,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findAllById(Long userId);
     @Query("SELECT DISTINCT a.time FROM Appointment a WHERE a.date = :date AND a.isAvailable = 'RESERVED'")
     List<LocalTime> findReservedTimesByDate(LocalDate date);
+
+    List<LocalTime> findAvailableTimesByDate(LocalDate date);
 }

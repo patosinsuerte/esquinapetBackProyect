@@ -18,6 +18,7 @@ public class UserProfileDTO implements Serializable {
     private String email;
     private String phone;
     private String rut;
+    private Boolean isActive;
     private String role;
     private List<AppointmentResponseDTO> appointments;
 }

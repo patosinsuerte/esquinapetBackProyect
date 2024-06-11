@@ -2,16 +2,13 @@ package com.esquinaPet.veterinariabackend.infra.errors;
 
 
 import com.esquinaPet.veterinariabackend.dto.ApiError;
-import com.esquinaPet.veterinariabackend.infra.exceptions.InvalidAppointmentDateException;
-import com.esquinaPet.veterinariabackend.infra.exceptions.InvalidAppointmentTimeException;
-import com.esquinaPet.veterinariabackend.infra.exceptions.UserAlreadyExistsException;
+import com.esquinaPet.veterinariabackend.infra.exceptions.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -176,6 +173,70 @@ public class ErrorHandler {
         // Devolver la respuesta
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
     }
+
+
+
+
+    // email NO EXISTE
+
+    @ExceptionHandler(EmailHasNotExistException.class)
+    public ResponseEntity<Map<String, Object>> handleEmailHasNotExistException(EmailHasNotExistException ex) {
+        Map<String, Object> responseBody = this.buildResponse(
+                "email",  // Nombre del campo
+                ex.getMessage(),  // Mensaje de error
+                "Por favor, Ingrese un correo valido",  // Descripción
+                HttpStatus.BAD_REQUEST.value()  // Código de estado HTTP
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+    }
+
+
+    // wrong password
+    @ExceptionHandler(WrongPasswordException.class)
+    public ResponseEntity<Map<String, Object>> handleWrongPasswordException(WrongPasswordException ex) {
+        Map<String, Object> responseBody = this.buildResponse(
+                "password",  // Nombre del campo
+                ex.getMessage(),  // Mensaje de error
+                "Contrasena invalida, por favor intente nuevamente",  // Descripción
+                HttpStatus.BAD_REQUEST.value()  // Código de estado HTTP
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+    }
+
+
+
+    // User info NOT match exception handler
+
+    @ExceptionHandler(UserInfoNotMatchException.class)
+    public ResponseEntity<Map<String, Object>> handleUserInfoNotMatchException(UserInfoNotMatchException e){
+
+        Map<String, Object> responseBody = this.buildResponse(
+                "Campo con error: " + e.getField(),
+                 "Por favor ingresa los valores adecuados",
+                "Los campos: " + e.getValueInRequest() + " " + e.getValueInProfile() + " no coinciden",
+                HttpStatus.BAD_REQUEST.value()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+    }
+
+
+
+    @ExceptionHandler(TimeIsNotAvailable.class)
+    public ResponseEntity<Map<String, Object>> handlerTimeIsNotAvailable(TimeIsNotAvailable e){
+
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("Filed", e.getField());
+        responseBody.put("Message", e.getMessage());
+        responseBody.put("Code error", e.getCode());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(responseBody);
+    }
+
+
+
+
+
+
 
 
 }

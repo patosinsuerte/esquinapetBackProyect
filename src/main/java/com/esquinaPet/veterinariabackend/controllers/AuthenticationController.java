@@ -3,11 +3,14 @@ package com.esquinaPet.veterinariabackend.controllers;
 import com.esquinaPet.veterinariabackend.domain.services.auth.AuthenticationService;
 import com.esquinaPet.veterinariabackend.domain.services.impl.AppointmentServiceImpl;
 import com.esquinaPet.veterinariabackend.dto.*;
+import com.esquinaPet.veterinariabackend.infra.exceptions.EmailHasNotExistException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -22,13 +25,13 @@ public class AuthenticationController {
     private final AppointmentServiceImpl appointmentService;
 
     @Autowired
-    public AuthenticationController(AuthenticationService authenticationService, AppointmentServiceImpl appointmentService) {
+    public AuthenticationController(AuthenticationService authenticationService, AppointmentServiceImpl appointmentService, PasswordEncoder passwordEncoder) {
         this.authenticationService = authenticationService;
         this.appointmentService = appointmentService;
     }
 
 
-    @GetMapping("/validate")
+    @GetMapping("/validate-token")
     public ResponseEntity<Boolean> validate(
             @RequestParam String jwt
     ) {
@@ -46,6 +49,8 @@ public class AuthenticationController {
         AuthenticationResponseDTO authenticationResponseDTO = authenticationService.login(authenticationRequest);
         return ResponseEntity.ok(authenticationResponseDTO);
     }
+
+
 
     @GetMapping("/profile")
     public ResponseEntity<UserProfileDTO> findMyProfile() {
@@ -65,9 +70,6 @@ public class AuthenticationController {
     }
 
 
-
-
-
 /*********************LOGGED USER****************************************************/
 
     //* CREATE NEW APPOINTMENT
@@ -85,7 +87,6 @@ public class AuthenticationController {
         return ResponseEntity.created(uri).body(appointmentResponseDTO);
     }
 
-
     // GET ALL APPIOINTMENTS BY LOGGED ID USER
     @GetMapping("/appointments")
     public ResponseEntity<List<AppointmentResponseDTO>> getAllAppointmentsByLoggedIdUser() {
@@ -93,12 +94,28 @@ public class AuthenticationController {
     }
 
     // cancel appoinment by authenticated user
-    @PutMapping("/appointment/{id}/canceled")
-    public ResponseEntity<AppointmentResponseDTO> cancelAppointmentByIdAuthenticatedUser(
+    @PutMapping("/appointments/{id}/cancel")
+    public ResponseEntity<Boolean> cancelAppointmentByIdAuthenticatedUser(
             @PathVariable("id") Long id
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(appointmentService.cancelAppointmentByAuthenticatedUser(id));
+        return ResponseEntity.status(HttpStatus.OK).body(this.appointmentService.cancelAppointmentByAuthenticatedUser(id));
     }
 
 
+    // edit user info
+    @PatchMapping("/user/edit")
+    public ResponseEntity<UserResponseDTO> editLoggedUserInfo(
+            @Valid
+            @RequestBody EditUserRequestDTO editUserRequestDTO
+    ){
+        return ResponseEntity.ok(this.authenticationService.editLoggedUserInfo(editUserRequestDTO));
+    }
+
+
+
+    // TODOS LOS APPOINTMENTS DEL USUARIO ACTIVAS
+    @GetMapping("/appointments/actives")
+    public ResponseEntity<List<AppointmentResponseDTO>> getAllUserActiveAppointments(){
+        return ResponseEntity.ok(this.appointmentService.getAllUserAppointmentsActives());
+    }
 }

@@ -22,6 +22,7 @@ public interface UserProfileMapper {
             @Mapping(source = "email", target = "email"),
             @Mapping(source = "phone", target = "phone"),
             @Mapping(source = "role", target = "role"),
+            @Mapping(source = "isActive", target = "isActive"),
             @Mapping(source = "appointments", target = "appointments"),
     })
     UserProfileDTO userToUserProfileDTO(User user);

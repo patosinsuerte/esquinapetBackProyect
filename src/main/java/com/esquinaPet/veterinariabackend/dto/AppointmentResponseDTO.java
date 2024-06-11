@@ -2,6 +2,7 @@ package com.esquinaPet.veterinariabackend.dto;
 
 import com.esquinaPet.veterinariabackend.domain.models.Pet;
 import com.esquinaPet.veterinariabackend.domain.models.ServiceType;
+import com.esquinaPet.veterinariabackend.domain.utils.enums.AvailabilityStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,7 @@ public class AppointmentResponseDTO implements Serializable {
     private Long id;
     private String name;
     private String lastName;
+    private String petName;
     private String rut;
     private String email;
     private String phone;
@@ -27,6 +29,8 @@ public class AppointmentResponseDTO implements Serializable {
     private LocalDate date;
     @JsonFormat(pattern = "HH:mm")
     private LocalTime time;
+    private String isAvailable;
+    private Boolean isActive;
     private PetDTO pet;
     private ServiceTypeDTO serviceType;
 }

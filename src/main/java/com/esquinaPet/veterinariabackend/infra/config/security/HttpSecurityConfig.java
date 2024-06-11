@@ -85,8 +85,8 @@ public class HttpSecurityConfig {
         auth.requestMatchers(HttpMethod.POST, "/appointments")
                 .hasAnyRole(Role.ADMINISTRATOR.name(), Role.ASSISTANT_ADMINISTRATOR.name(), Role.USER.name());
 
-        auth.requestMatchers(HttpMethod.PUT, "/appointments/{id}/canceled")
-                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.ASSISTANT_ADMINISTRATOR.name(), Role.USER.name());
+        auth.requestMatchers(RegexRequestMatcher.regexMatcher(HttpMethod.PUT, "auth/appointments/[0-9]*/cancel"))
+                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.ASSISTANT_ADMINISTRATOR.name());
 
 //        // AUTORIZACION ENDPOINTS SERVICESTYPE
         auth.requestMatchers(HttpMethod.GET, "/service-types")
@@ -98,24 +98,33 @@ public class HttpSecurityConfig {
         auth.requestMatchers(HttpMethod.GET, "/auth/appointments")
                 .hasRole(Role.USER.name());
 
+        // AUTORIZACION USER
+        auth.requestMatchers(HttpMethod.PATCH, "/auth/user/edit")
+                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.ASSISTANT_ADMINISTRATOR.name(), Role.USER.name());
+
+
 
         // END POINTS PUBLICOS
         auth.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
         auth.requestMatchers(HttpMethod.POST, "/auth/logout").permitAll();
+        auth.requestMatchers(HttpMethod.GET, "/auth/validate-token").permitAll();
         auth.requestMatchers(HttpMethod.POST, "/users/register/user").permitAll();
         auth.requestMatchers(HttpMethod.POST, "/users/register/admin").permitAll();
+        auth.requestMatchers(HttpMethod.GET, "/validation/*").permitAll();
         auth.requestMatchers(HttpMethod.GET, "/test").permitAll();
-        auth.requestMatchers(HttpMethod.GET, "/validation/**").permitAll();
+        auth.requestMatchers(HttpMethod.GET, "/times/reserved/by/date").permitAll();
+
         auth.anyRequest().authenticated();
     }
 
 
-    // CORS CONFIGURATION
+    // CORS CONFIGURATIONclear
+
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:5500", "http://localhost:8083", "http://localhost:5500", "http://localhost:4200", "http://127.0.0.1:4200"));
-        configuration.setAllowedMethods(Arrays.asList("GET","POST"));
+        configuration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:5500", "http://localhost:8083", "http://localhost:5500", "http://localhost:4200", "http://127.0.0.1:4200", "http://127.0.0.1:8083"));
+        configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

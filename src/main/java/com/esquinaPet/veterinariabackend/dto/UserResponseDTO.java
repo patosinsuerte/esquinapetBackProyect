@@ -20,6 +20,7 @@ public class UserResponseDTO implements Serializable {
     private String phone;
     private String rut;
     private String role;
+    private Boolean isActive;
     //    @JsonManagedReference
     private List<AppointmentResponseDTO> appointments;
 }
